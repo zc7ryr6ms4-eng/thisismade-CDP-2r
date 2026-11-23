@@ -2,7 +2,7 @@ name: Build & Release
 
 on:
   push:
-    branches: [main, cdp-2r]
+    branches: [main]
     tags: ["v*"]
   pull_request:
   workflow_dispatch:
@@ -68,7 +68,10 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: screenshot
-          path: screenshot-ci.png
+          path: |
+            screenshot-ci.png
+            look-rust.png
+            look-python.png
       - uses: actions/upload-artifact@v4
         with:
           name: deb
@@ -77,15 +80,6 @@ jobs:
         with:
           name: cargo-lock
           path: Cargo.lock
-      - name: Paket + Screenshot auf Branch cdp-2r-dist ablegen
-        if: github.event_name == 'push' && github.ref == 'refs/heads/cdp-2r'
-        run: |
-          mkdir -p "$RUNNER_TEMP/dist" && cp dist/*.deb screenshot-ci.png look-rust.png look-python.png Cargo.lock "$RUNNER_TEMP/dist/"
-          cd "$RUNNER_TEMP/dist"
-          git init -q -b cdp-2r-dist
-          git -c user.name="github-actions" -c user.email="actions@github.com" add -A
-          git -c user.name="github-actions" -c user.email="actions@github.com" commit -q -m "Build ${GITHUB_SHA::7}"
-          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" cdp-2r-dist
 
   release:
     name: GitHub-Release
